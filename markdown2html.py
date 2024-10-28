@@ -16,17 +16,23 @@ def analyze_header(line):
     return "<h{}>{}</h{}>\n".format(countHashtag, line, countHashtag)
 
 
-def analyze_unordered(lines):
+def analyze_unordered(lines, mode = "-"):
     """
     Analyze an unordered list line of Markdown and convert it to HTML
     """
+
     if not lines:
         return "", 0
+    
 
-    results = "<ul>\n"
+    base = "ul"
+    if mode == "*":
+        base = "ol"
+
+    results = "<{}>\n".format(base)
     cut = 0
     for line in lines:
-        if line[0] == "-":
+        if ["-", "*"].count(line[0]) == 1:
             cut += 1
             results += "\t<li>" + line[1:].strip() + "</li>\n"
             continue
@@ -35,7 +41,7 @@ def analyze_unordered(lines):
     if cut == 0:
         return "", 0
 
-    results += "</ul>\n"
+    results += "</{}>\n".format(base)
 
     return results, cut
 
@@ -75,12 +81,13 @@ def main():
 
             line = line.strip()
 
-            if line and line[0] == "-":
-                res, cut = analyze_unordered(lines)
-                result += res
+            if line:
+                if ["-", "*"].count(line[0]) == 1:
+                    res, cut = analyze_unordered(lines, line[0])
+                    result += res
 
-                lines = lines[cut:]
-                continue
+                    lines = lines[cut:]
+                    continue
 
             lines = lines[1:]
             result += analyze_line(line)
