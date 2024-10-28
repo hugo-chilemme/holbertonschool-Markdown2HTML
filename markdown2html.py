@@ -5,6 +5,27 @@ Script to convert markdown to HTML
 import sys
 
 
+def analyze_line(line):
+    """
+    Analyze a line of Markdown and convert it to HTML
+    """
+    countHashtag = 0
+    line = line.strip()
+    for c in line:
+        if c == '#':
+            countHashtag += 1
+            line = line[1:]
+        elif c == ' ':
+            line = line[1:]
+        else:
+            break
+
+    if countHashtag == 0:
+        return line
+    
+    return "<h{}>{}</h{}>".format(countHashtag, line, countHashtag)
+
+
 def main():
     """
     Main function for markdown2html.py
@@ -15,8 +36,14 @@ def main():
         sys.exit(1)
 
     try:
+
+        result = ""
         with open(sys.argv[1], 'r') as f:
             lines = f.readlines()
+            for line in lines:
+                result += analyze_line(line) + "\n"
+            with open(sys.argv[2], 'w') as f:
+                f.write(result)
 
     except FileNotFoundError:
         print("Missing {}".format(sys.argv[1]),
