@@ -12,11 +12,10 @@ def analyze_line(line):
     countHashtag = 0
     line = line.strip()
     for c in line:
-        if c == '#':
-            countHashtag += 1
+        if ["#", " ", "\t"] == list(c):
             line = line[1:]
-        elif c == ' ':
-            line = line[1:]
+            if c == '#':
+                countHashtag += 1
         else:
             break
 
@@ -39,9 +38,11 @@ def main():
 
         result = ""
         with open(sys.argv[1], 'r') as f:
+
             lines = f.readlines()
             for line in lines:
                 result += analyze_line(line) + "\n"
+
             with open(sys.argv[2], 'w') as f:
                 f.write(result)
 
