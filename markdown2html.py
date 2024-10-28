@@ -11,30 +11,39 @@ def analyze_header(line):
     """
     countHashtag = line.split(" ")[0].count("#")
 
-    return "<h{}>{}</h{}>".format(countHashtag, line, countHashtag)
+    line = line.replace("#", "", countHashtag).strip()
+
+    return "<h{}>{}</h{}>\n".format(countHashtag, line, countHashtag)
 
 
-def analyze_unordered(line, options):
+def analyze_unordered(lines):
     """
     Analyze an unordered list line of Markdown and convert it to HTML
     """
-    if not options.get("Unordered"):
-        options["Unordered"] = True
-        return "<ul>\n\t<li>{}</li>".format(line[2:])
-    elif not line or line[0] != '-':
-        options["Unordered"] = False
-        return "</ul>\n{}".format(analyze_line(line, options))
+    if not lines:
+        return "", 0
 
-    return "\t<li>{}</li>".format(line[2:])
+    results = "<ul>\n"
+    cut = 0
+    for line in lines:
+        if line[0] == "-":
+            cut += 1
+            results += "\t<li>" + line[1:].strip() + "</li>\n"
+            continue
+        break
+
+    if cut == 0:
+        return "", 0
+
+    results += "</ul>\n"
+
+    return results, cut
 
 
-def analyze_line(line, options):
+def analyze_line(line):
     """
     Analyze a line of Markdown and convert it to HTML
     """
-
-    if options.get("Unordered"):
-        return analyze_unordered(line, options)
 
     if not line or line == "":
         return ""
@@ -42,10 +51,7 @@ def analyze_line(line, options):
     if line[0] == "#":
         return analyze_header(line)
 
-    if line[0] == '-':
-        return analyze_unordered(line, options)
-
-    return line
+    return line + "\n"
 
 
 def main():
@@ -59,25 +65,29 @@ def main():
 
     try:
 
-        result = ""
+        lines = ""
         with open(sys.argv[1], 'r') as f:
 
             lines = f.readlines()
 
-            options = {
-                "Unordered": False,
-            }
+        for line in lines:
 
-            for line in lines:
+            line = line.strip()
 
-                line = line.strip()
+            print(line)
 
-                result += analyze_line(line, options) + "\n"
+            if line and line[0] == "-":
+                res, cut = analyze_unordered(lines)
+                result += res
 
-            analyze_line("", options)
+                lines = lines[cut:]
+                continue
 
-            with open(sys.argv[2], 'w') as f:
-                f.write(result)
+            lines = lines[1:]
+            result += analyze_line(line)
+
+        with open(sys.argv[2], 'w') as f:
+            f.write(result)
 
     except FileNotFoundError:
         print("Missing {}".format(sys.argv[1]),
