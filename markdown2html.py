@@ -1,11 +1,14 @@
 #!/usr/bin/python3
+"""
+Script to convert markdown to HTML
+"""
+
 import sys
 
 def main():
     """
-    Main function
+    Main function for markdown2html.py
     """
-
     if len(sys.argv) != 3:
         print("Usage: ./markdown2html.py README.md README.html", file=sys.stderr)
         sys.exit(1)
