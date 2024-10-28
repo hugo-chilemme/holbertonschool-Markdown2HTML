@@ -1,19 +1,21 @@
 #!/usr/bin/python3
 import sys
 
-if (len(sys.argv) != 3):
-    print("Usage: ./markdown2html.py README.md README.html")
-    exit(1)
+def main():
 
-md_file = sys.argv[1]
-html_file = sys.argv[2]
+    if len(sys.argv) != 3:
+        print("Usage: ./markdown2html.py README.md README.html", file=sys.stderr)
+        sys.exit(1)
 
+    try:
+        with open(sys.argv[1], 'r') as f:
+            lines = f.readlines()
 
-try:
-    with open(md_file, 'r') as f:
-        md_content = f.read()
-except FileNotFoundError:
-    print("Missing {}".format(md_file))
-    exit(1)
+    except FileNotFoundError:
+        print("Missing {}".format(sys.argv[1]), file=sys.stderr)
+        sys.exit(1)
 
-exit(0)
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()
