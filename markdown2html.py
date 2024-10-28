@@ -3,6 +3,7 @@
 Script to convert markdown to HTML
 """
 import sys
+import datetime
 
 
 def analyze_header(line):
@@ -16,17 +17,33 @@ def analyze_header(line):
     return "<h{}>{}</h{}>\n".format(countHashtag, line, countHashtag)
 
 
+def analyse_paragraph(lines):
+    """
+    Analyze a paragraph of Markdown and convert it to HTML
+    """
+    results = []
+    cut = 0
+    for line in lines:
+        if len(line.strip()) == 0:
+            break
+        results.append("\t" + line.strip())
+
+        cut += 1
+
+    if results == []:
+        return "", 0
+
+    return "<p>\n" + "\n\t\t<br />\n".join(results) + "\n</p>\n", cut
+
+
 def analyze_unordered(lines, mode="-"):
     """
     Analyze an unordered list line of Markdown and convert it to HTML
     """
-
     if not lines:
         return "", 0
 
-    base = "ul"
-    if mode == "*":
-        base = "ol"
+    base = mode == "-" and "ul" or "ol"
 
     results = "<{}>\n".format(base)
     cut = 0
@@ -45,20 +62,6 @@ def analyze_unordered(lines, mode="-"):
     return results, cut
 
 
-def analyze_line(line):
-    """
-    Analyze a line of Markdown and convert it to HTML
-    """
-
-    if not line or line == "":
-        return ""
-
-    if line[0] == "#":
-        return analyze_header(line)
-
-    return line + "\n"
-
-
 def main():
     """
     Main function for markdown2html.py
@@ -75,21 +78,36 @@ def main():
 
             lines = f.readlines()
 
-        result = ""
+        result = "<!-- Generated at {} -->\n".format(
+            datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
         for line in lines:
 
             line = line.strip()
 
-            if line:
-                if ["-", "*"].count(line[0]) == 1:
-                    res, cut = analyze_unordered(lines, line[0])
-                    result += res
+            if not line:
+                line = " "
 
-                    lines = lines[cut:]
-                    continue
+            if ["-", "*"].count(line[0]) == 1:
+                res, cut = analyze_unordered(lines, line[0])
+                result += res
 
-            lines = lines[1:]
-            result += analyze_line(line)
+                lines = lines[cut:]
+                continue
+
+            if line[0] == "#":
+                result += analyze_header(line)
+                lines = lines[1:]
+                continue
+
+            if line == " ":
+                lines = lines[1:]
+                continue
+
+            res, cut = analyse_paragraph(lines)
+
+            result += res
+            lines = lines[cut:]
 
         with open(sys.argv[2], 'w') as f:
             f.write(result)
