@@ -16,14 +16,13 @@ def analyze_header(line):
     return "<h{}>{}</h{}>\n".format(countHashtag, line, countHashtag)
 
 
-def analyze_unordered(lines, mode = "-"):
+def analyze_unordered(lines, mode="-"):
     """
     Analyze an unordered list line of Markdown and convert it to HTML
     """
 
     if not lines:
         return "", 0
-    
 
     base = "ul"
     if mode == "*":
