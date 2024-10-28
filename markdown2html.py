@@ -22,7 +22,7 @@ def analyze_line(line):
 
     if countHashtag == 0:
         return line
-    
+
     return "<h{}>{}</h{}>".format(countHashtag, line, countHashtag)
 
 
