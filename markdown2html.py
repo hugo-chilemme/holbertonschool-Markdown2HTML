@@ -70,11 +70,10 @@ def main():
 
             lines = f.readlines()
 
+        result = ""
         for line in lines:
 
             line = line.strip()
-
-            print(line)
 
             if line and line[0] == "-":
                 res, cut = analyze_unordered(lines)
